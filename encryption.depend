@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1493027515 source:c:\users\marcker\desktop\c_projekter\ooii_iv\encryption\main.cpp
+	<iostream>
+	<conio.h>
+	<string.h>
+
