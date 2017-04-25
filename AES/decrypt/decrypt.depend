@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1493110389 source:c:\users\marcker\desktop\c_projekter\decrypt\main.cpp
+	<iostream>
+	<conio.h>
+	<string.h>
+
