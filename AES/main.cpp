@@ -1,6 +1,7 @@
 #include <iostream>
 #include <conio.h>
 #include <string.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -58,7 +59,7 @@ unsigned char mul3[]={
 0x3b,0x38,0x3d,0x3e,0x37,0x34,0x31,0x32,0x23,0x20,0x25,0x26,0x2f,0x2c,0x29,0x2a,
 0x0b,0x08,0x0d,0x0e,0x07,0x04,0x01,0x02,0x13,0x10,0x15,0x16,0x1f,0x1c,0x19,0x1a};
 
-int inv_sbox[256] = {
+unsigned char inv_sbox[256] = {
 0x52 ,0x09 ,0x6a ,0xd5 ,0x30 ,0x36 ,0xa5 ,0x38 ,0xbf ,0x40 ,0xa3 ,0x9e ,0x81 ,0xf3 ,0xd7 ,0xfb,
 0x7c ,0xe3 ,0x39 ,0x82 ,0x9b ,0x2f ,0xff ,0x87 ,0x34 ,0x8e ,0x43 ,0x44 ,0xc4 ,0xde ,0xe9 ,0xcb,
 0x54 ,0x7b ,0x94 ,0x32 ,0xa6 ,0xc2 ,0x23 ,0x3d ,0xee ,0x4c ,0x95 ,0x0b ,0x42 ,0xfa ,0xc3 ,0x4e,
@@ -148,8 +149,6 @@ unsigned char mul14[]={
 0x37,0x39,0x2b,0x25,0x0f,0x01,0x13,0x1d,0x47,0x49,0x5b,0x55,0x7f,0x71,0x63,0x6d,
 0xd7,0xd9,0xcb,0xc5,0xef,0xe1,0xf3,0xfd,0xa7,0xa9,0xbb,0xb5,0x9f,0x91,0x83,0x8d};
 
-
-
 unsigned char rcon[256] = {
 0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a,
 0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91, 0x39,
@@ -169,7 +168,15 @@ unsigned char rcon[256] = {
 0x61, 0xc2, 0x9f, 0x25, 0x4a, 0x94, 0x33, 0x66, 0xcc, 0x83, 0x1d, 0x3a, 0x74, 0xe8, 0xcb, 0x8d};
 
 
+void printHex(unsigned char x)
+{
+	if(x/16 <10) cout<<(char)((x/16)+'0');
+	if(x/16 >=10) cout<<(char)((x/16-10)+'A');
 
+	if(x % 16 < 10) cout <<(char)((x % 16) + '0');
+	if(x % 16 >= 10) cout <<(char)((x % 16 -10) + 'A');
+	cout << " ";
+}
 
 void KeyExpansionCore (unsigned char* in,unsigned char i)
 {
@@ -214,20 +221,33 @@ void KeyExpansion(unsigned char* inputKey, unsigned char* expandedKeys)
 			expandedKeys[bytesGenerated]=expandedKeys[bytesGenerated -16]^temp[a];
 			bytesGenerated++;
 		}
-
 	}
+}
+
+void AddRoundKey(unsigned char* state,unsigned char* RoundKey)
+{
+    cout << "Roundkey"<<endl;
+	for(int i=0;i<16;i++)
+        printHex(RoundKey[i]);
+    cout << endl;
+    cout << "Addkey"<<endl;
+	for(int i=0;i<16;i++)
+    {
+        state[i] ^=RoundKey[i];
+        printHex(state[i]);
+    }
+    cout << endl;
 }
 
 void SubBytes(unsigned char* state)
 {
+    cout << "SubBytes"<<endl;
 	for(int i=0;i<16;i++)
-		state[i]=s_box[state[i]];
-}
-
-void inv_SubBytes(unsigned char* state)
-{
-	for(int i=0;i<16;i++)
-		state[i]=s_box[state[i]];
+    {
+        state[i]=s_box[state[i]];
+        printHex(state[i]);
+    }
+    cout << endl;
 }
 
 void ShiftRow(unsigned char* state)
@@ -254,41 +274,19 @@ void ShiftRow(unsigned char* state)
 	tmp[14]=state[6];
 	tmp[15]=state[11];
 
+    cout << "ShiftRow"<<endl;
 	for(int i=0; i<16;i++)
-		state[i]=tmp[i];
-}
-
-void inv_ShiftRow(unsigned char* state)
-{
-	unsigned char tmp[16];
-
-	tmp[0]=state[0];
-	tmp[1]=state[13];
-	tmp[2]=state[10];
-	tmp[3]=state[14];
-
-	tmp[4]=state[4];
-	tmp[5]=state[1];
-	tmp[6]=state[14];
-	tmp[7]=state[11];
-
-	tmp[8]=state[8];
-	tmp[9]=state[5];
-	tmp[10]=state[2];
-	tmp[11]=state[15];
-
-	tmp[12]=state[12];
-	tmp[13]=state[9];
-	tmp[14]=state[6];
-	tmp[15]=state[3];
-
-	for(int i=0; i<16;i++)
-		state[i]=tmp[i];
+    {
+            state[i]=tmp[i];
+            printHex(state[i]);
+    }
+    cout << endl;
 }
 
 void MixColumns(unsigned char* state)
 {
 	unsigned char tmp[16];
+
 	tmp[0] = (unsigned char)(mul2[state[0]] ^ mul3[state[1]] ^ state[2] ^ state[3]);
 	tmp[1] = (unsigned char)(state[0] ^ mul2[state[1]] ^ mul3[state[2]] ^ state[3]);
 	tmp[2] = (unsigned char)(state[0] ^ state[1] ^ mul2[state[2]] ^ mul3[state[3]]);
@@ -309,13 +307,62 @@ void MixColumns(unsigned char* state)
 	tmp[14] = (unsigned char)(state[12] ^ state[13] ^ mul2[state[14]] ^ mul3[state[15]]);
 	tmp[15] = (unsigned char)(mul3[state[12]] ^ state[13] ^ state[14] ^ mul2[state[15]]);
 
+    cout << "MixColumns"<<endl;
 	for(int i=0;i<16;i++)
-		state[i]=tmp[i];
+    {
+        state[i]=tmp[i];
+        printHex(state[i]);
+    }
+    cout << endl;
+}
+
+void inv_SubBytes(unsigned char* state)
+{
+    cout << "Inv_SubBytes"<<endl;
+	for(int i=0;i<16;i++)
+    {
+        state[i]=inv_sbox[state[i]];
+		printHex(state[i]);
+    }
+    cout << endl;
+}
+
+void inv_ShiftRow(unsigned char* state)
+{
+	unsigned char tmp[16];
+
+	tmp[0]=state[0];
+	tmp[1]=state[13];
+	tmp[2]=state[10];
+	tmp[3]=state[7];
+
+	tmp[4]=state[4];
+	tmp[5]=state[1];
+	tmp[6]=state[14];
+	tmp[7]=state[11];
+
+	tmp[8]=state[8];
+	tmp[9]=state[5];
+	tmp[10]=state[2];
+	tmp[11]=state[15];
+
+	tmp[12]=state[12];
+	tmp[13]=state[9];
+	tmp[14]=state[6];
+	tmp[15]=state[3];
+    cout << "Inv_ShiftRow"<<endl;
+	for(int i=0; i<16;i++)
+    {
+        state[i]=tmp[i];
+		printHex(state[i]);
+    }
+    cout << endl;
 }
 
 void inv_MixColumns(unsigned char* state)
 {
 	unsigned char tmp[16];
+
 	tmp[0] = (unsigned char)(mul14[state[0]] ^ mul11[state[1]] ^ mul13[state[2]] ^ mul9[state[3]]);
 	tmp[1] = (unsigned char)(mul9[state[0]] ^ mul14[state[1]] ^ mul11[state[2]] ^ mul13[state[3]]);
 	tmp[2] = (unsigned char)(mul13[state[0]] ^ mul9[state[1]] ^ mul14[state[2]] ^ mul11[state[3]]);
@@ -328,46 +375,45 @@ void inv_MixColumns(unsigned char* state)
 
 	tmp[8] = (unsigned char)(mul14[state[8]] ^ mul11[state[9]] ^ mul13[state[10]] ^ mul9[state[11]]);
 	tmp[9] = (unsigned char)(mul9[state[8]] ^ mul14[state[9]] ^ mul11[state[10]] ^ mul13[state[11]]);
-	tmp[10] = (unsigned char)(mul11[state[8]] ^ mul13[state[9]] ^ mul9[state[10]] ^ mul14[state[11]]);
+	tmp[10] = (unsigned char)(mul13[state[8]] ^ mul9[state[9]] ^ mul14[state[10]] ^ mul11[state[11]]);
 	tmp[11] = (unsigned char)(mul11[state[8]] ^ mul13[state[9]] ^ mul9[state[10]] ^ mul14[state[11]]);
 
 	tmp[12] = (unsigned char)(mul14[state[12]] ^ mul11[state[13]] ^ mul13[state[14]] ^ mul9[state[15]]);
 	tmp[13] = (unsigned char)(mul9[state[12]] ^ mul14[state[13]] ^ mul11[state[14]] ^ mul13[state[15]]);
-	tmp[14] = (unsigned char)(mul11[state[12]] ^ mul13[state[13]] ^ mul9[state[14]] ^ mul14[state[15]]);
+	tmp[14] = (unsigned char)(mul13[state[12]] ^ mul9[state[13]] ^ mul14[state[14]] ^ mul11[state[15]]);
 	tmp[15] = (unsigned char)(mul11[state[12]] ^ mul13[state[13]] ^ mul9[state[14]] ^ mul14[state[15]]);
 
+	cout << "Inv_MixColumns"<<endl;
 	for(int i=0;i<16;i++)
-		state[i]=tmp[i];
+    {
+        state[i]=tmp[i];
+        printHex(state[i]);
+    }
+    cout << endl;
 }
 
-void AddRoundKey(unsigned char* state,unsigned char* RoundKey)
-{
-	for(int i=0;i<16;i++)
-		state[i] ^=RoundKey[i];
-}
 
 void AES_Encrypt(unsigned char* message,unsigned char* key)
 {
 	unsigned char state[16];
+	int numberOfRounds = 9;
 
 	for(int i=0;i<16;i++)
 		state[i]=message[i];
-
-	int numberOfRounds = 9;
-
-	unsigned char expandedKey[176];
-	KeyExpansion(key,expandedKey);
+    cout << "Round Ini"<<endl;
 	AddRoundKey(state,key);
 	for (int i=0; i<numberOfRounds;i++)
 	{
+	    cout << "Round" << i+1<<endl;
 		SubBytes(state);
 		ShiftRow(state);
 		MixColumns(state);
-		AddRoundKey(state,expandedKey+(16*(i+1)));
+		AddRoundKey(state,key+(16*(i+1)));
 	}
+	cout << "Round 10"<<endl;
 	SubBytes(state);
 	ShiftRow(state);
-	AddRoundKey(state,expandedKey + 160);
+	AddRoundKey(state,key + 160);
 
 	//copy cipher text over the message
 	for(int i=0;i<16;i++)
@@ -380,111 +426,109 @@ void AES_Decrypt(unsigned char* message,unsigned char* key)
 
 	for(int i=0;i<16;i++)
 		state[i]=message[i];
-
-	unsigned char expandedKey[176];
-	KeyExpansion(key,expandedKey);
-
-	AddRoundKey(state,expandedKey + 160);
+    cout << "Round 10"<<endl;
+	AddRoundKey(state,key + 160);
 	inv_ShiftRow(state);
 	inv_SubBytes(state);
 
 	int numberOfRounds = 9;
-
-	for (int i=0; i<numberOfRounds;i++)
+	for (int i=0;i<numberOfRounds;i++)
 	{
-		AddRoundKey(state,expandedKey+(160-(16*(i+1))));
-        inv_MixColumns(state);
+	    cout << "Round" << numberOfRounds-i<<endl;
+	    int number = 160-(16*(i+1));
+	    AddRoundKey(state,key+number);
+	    cout << "_________________________"<<endl;
+	    for(int i=0;i<4;i++)
+            printHex(state[i]);
+        cout << endl<<"_________________________"<<endl;
+	    inv_MixColumns(state);
         inv_ShiftRow(state);
         inv_SubBytes(state);
 	}
+	cout << "Round Ini"<<endl;
 	AddRoundKey(state,key);
 	//copy cipher text over the message
 	for(int i=0;i<16;i++)
 		message[i]=state[i];
 }
 
-void printHex(unsigned char x)
+void Decryptor(unsigned char *message)
 {
-	if(x/16 <10) cout<<(char)((x/16)+'0');
-	if(x/16 >=10) cout<<(char)((x/16-10)+'A');
+    int originalLen = strlen((const char*)message);
+    unsigned char *Message = new unsigned char[originalLen];
+    unsigned char Key[16]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+    unsigned char expandedKey[176];
 
-	if(x % 16 < 10) cout <<(char)((x % 16) + '0');
-	if(x % 16 >= 10) cout <<(char)((x % 16 -10) + 'A');
+    for(int i=0;i<originalLen;i++)
+		Message[i]=message[i];
+	KeyExpansion(Key,expandedKey);
+	for(int i=0;i<originalLen;i+=16)
+		AES_Decrypt(Message+i,expandedKey);
+
+	cout<<"\nDecrypted message"<<endl;
+	for(int i=0;i<originalLen;i++)
+		cout<< Message[i] << " ";
+    cout<<endl;
+
 }
-
 
 unsigned char * Encryptor (unsigned char* message)
 {
     int originalLen = strlen((const char*)message);
     unsigned char *Message = new unsigned char[originalLen];
-    Message = message;
-	unsigned char Key[16]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-
+    unsigned char Key[16]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
 	int lenOfPaddedMessage = originalLen;
+	unsigned char* paddedMessage = new unsigned char[lenOfPaddedMessage];
+	unsigned char expandedKey[176];
 
+    for(int i=0;i<originalLen;i++)
+		Message[i]=message[i];
 	if(lenOfPaddedMessage % 16 != 0)
 		lenOfPaddedMessage = (lenOfPaddedMessage / 16+1)*16;
-
-	unsigned char* paddedMessage = new unsigned char[lenOfPaddedMessage];
 	for(int i=0;i<lenOfPaddedMessage;i++)
 	{
 		if(i>=originalLen) paddedMessage[i]=0;
 		else paddedMessage[i]=Message[i];
 	}
 	// ENcrypt padded message
+	KeyExpansion(Key,expandedKey);
 	for(int i=0;i<lenOfPaddedMessage;i+=16)
     {
-        AES_Encrypt(paddedMessage+i,Key);
-		message[i]=paddedMessage[i];
+        AES_Encrypt(paddedMessage+i,expandedKey);
     }
+    message=paddedMessage;
+    cout<<"\nEncrypted message"<<endl;
+    for(int i=0;i<lenOfPaddedMessage;i++)
+		printHex(message[i]);
+	Decryptor(message);
+    return message;
 }
 
-/*void Decryptor(unsigned char *message)
-{
-    int originalLen = strlen((const char*)message);
-	for(int i=0;i<originalLen;i+=16)
-		AES_Decrypt(Message+i,Key);
-
-	cout<<"\nEncrypted message"<<endl;
-	for(int i=0;i<originalLen;i++)
-	{
-		cout<<Message[i];
-		cout<<" ";
-	}
-	cout<<"\n"<<endl;
-	for(int i=0;i<originalLen;i++)
-	{
-		printString(Message[i]);
-		cout<<" ";
-	}
-}*/
 
 int main()
 {
-    unsigned char Message[] = "jeg er den bedste i verden";
-    int Len = strlen((const char*)Message);
-	for(int i=0;i<Len;i++)
-	{
+    //6A 65 67 20 65 72 20 64 65 6E 20 62 65 64 73 74 65 20 69 20 76 65 72 64 65 6E
+    int tester=1063060240362306;
+    //{106,101,103,32,101,114,32,100,101,110,32,98,101,100,115,114,101,32,105,32,118,100,101,110};
+    unsigned char Message[5];
+    Message[0]=
+    Message[1] =
+    Message[2] =
+    Message[3] =
+    Message[4] =
+
+	int originalLen = strlen((const char*)Message);
+	for(int i=0;i<originalLen;i++)
 		printHex(Message[i]);
-		cout<<" ";
-	}
+    cout << endl;
 	Encryptor(Message);
-
-	cout<<"\nEncrypted message"<<endl;
-    int Len1 = strlen((const char*)Message);
-	for(int i=0;i<Len1;i++)
-	{
+	cout<<endl;
+	for(int i=0;i<originalLen;i++)
 		printHex(Message[i]);
-		cout<<" ";
-	}
-
+    cout << endl;
 
 	unsigned char cipher;
 	//Decryptor(cipher);
-
-
-
-
 	_getch();
 
 	return 0;
