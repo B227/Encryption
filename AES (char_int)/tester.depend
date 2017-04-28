@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1484003118 source:c:\users\marcker\desktop\c_projekter\tester\test.c
+	<stdio.h>
+	<stdlib.h>
+	<dirent.h>
+
